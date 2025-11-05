@@ -42,7 +42,7 @@ for item in soup.select("h5"): #<-- Replace .result with the real class/tag
     if link_tag and link_tag["href"]:
         link = link_tag["href"]
         results.append({"title": title, "link": link})
-        print(f"{title} - {link}")
+        # print(f"{title} - {link}")
 
 for result in results:
     driver.get(result["link"])
@@ -50,11 +50,12 @@ for result in results:
     detail_soup = BeautifulSoup(driver.page_source, "html.parser")
 
     #Example: extract some info
-    description = detail_soup.select_one(".description").get_text(strip=True) if detail_soup.select_one(".description") else None
-    contact = detail_soup.select_one(".contact").get_text(strip=True) if detail_soup.select_one(".contact") else None
+    field_label = detail_soup.select_one("fieldLabel").get_text(strip=True) if detail_soup.select_one("fieldLabel") else None
+    field_body = detail_soup.select_one("fieldBody").get_text(strip=True) if detail_soup.select_one("fieldBody") else None
 
-    result["description"] = description
-    result["contact"] = contact
+    result["field label"] = field_label
+    result["field_body"] = field_body
+    print(f"{field_label} and {field_body}")
 
 print(f"Found {len(results)} main results")
 
