@@ -1,16 +1,35 @@
-# This is a sample Python script.
+#Selenium to read Javescript enabled websites to find information
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+import time
 
+#step 1 - Configure Chrome
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+#step 2 - Create folder
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
+#step 3 - Open a Javascript-heavy webpage
+url = "https://massarbor.org/directory"
+print(f"Opening {url}")
+driver.get(url)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+#Step 4 - Wait for JS to load (simple fixed wait for now)
+time.sleep(3)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+#Step 5 - Grab the full rendered HTML and text
+html = driver.page_source
+
+print("\n--- HTML ---")
+print(html[:1000])  #print first 1000 characters for inspection
+
+print("\n--- TEXT ---")
+print(driver.find_element("tag name", "body").text[:1000])  #readable text of page
+
+driver.quit()
