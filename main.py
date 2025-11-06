@@ -7,6 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import time
 import sqlite3
+import re
 
 
 #step 1 - Configure Chrome / Setup Selenium
@@ -36,26 +37,37 @@ soup = BeautifulSoup(html, "html.parser")
 results = []
 
 for item in soup.select("h5"): #<-- Replace .result with the real class/tag
-    print(f"{item}")
+    # print(f"{item}")
     title = item.get_text(strip=True)
     link_tag = item.find("a")
     if link_tag and link_tag["href"]:
         link = link_tag["href"]
         results.append({"title": title, "link": link})
-        # print(f"{title} - {link}")
+        print(f"{title} - {link}")
 
 for result in results:
-    driver.get(result["link"])
-    time.sleep(2)
-    detail_soup = BeautifulSoup(driver.page_source, "html.parser")
+        link = result.get("link")
+        if not link:
+            print("Skipping result with no link", result)
+            continue
 
-    #Example: extract some info
-    field_label = detail_soup.select_one("fieldLabel").get_text(strip=True) if detail_soup.select_one("fieldLabel") else None
-    field_body = detail_soup.select_one("fieldBody").get_text(strip=True) if detail_soup.select_one("fieldBody") else None
+        driver.get(link)
 
-    result["field label"] = field_label
-    result["field_body"] = field_body
-    print(f"{field_label} and {field_body}")
+        time.sleep(3)
+
+        detail_soup = BeautifulSoup(driver.page_source, "html.parser")
+        for container in detail_soup.find_all("div",class_="fieldContainer"):
+            label_div = container.find("div", class_="fieldLabel")
+            value_div = container.find("div", class_="fieldBody")
+
+            label = label_div.get_text(strip=True) if label_div else None
+            value = value_div.get_text(strip=True) if value_div else None
+
+            if label and value:
+                results.append({label: value})
+
+for result in results:
+    print(item)
 
 print(f"Found {len(results)} main results")
 
